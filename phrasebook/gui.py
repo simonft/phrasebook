@@ -10,16 +10,14 @@ from phrasebook.passphrase import Wordlist
 
 
 class PhraseWindow(QMainWindow):
-    wordlist = None
-    regen_button = None
-    passphrase_widget = None
-    num_words_widget = None
+    def __init__(self,
+                 word_list_path=None,
+                 number_of_words=None,
+                 locale=None):
+        self.wordlist = Wordlist(path=word_list_path)
+        self.initUI(number_of_words=number_of_words)
 
-    def __init__(self):
-        self.wordlist = Wordlist()
-        self.initUI()
-
-    def initUI(self):
+    def initUI(self, number_of_words=None):
         QMainWindow.__init__(self)
 
         self.setMinimumSize(QSize(800, 40))
@@ -34,7 +32,7 @@ class PhraseWindow(QMainWindow):
         main_layout.addSpacing(15)
 
         # Main passphrase display
-        self.passphrase_widget = QLabel(self.wordlist.gen_passphrase(6), self)
+        self.passphrase_widget = QLabel(self.wordlist.gen_passphrase(number_of_words), self)
         self.passphrase_widget.setFont(QFont('SansSerif', 20))
         self.passphrase_widget.setAlignment(QtCore.Qt.AlignCenter)
         self.passphrase_widget.setWordWrap(True)
@@ -50,7 +48,7 @@ class PhraseWindow(QMainWindow):
         settings_line_box.addWidget(QLabel("Number of words", self))
         self.num_words_widget = QSpinBox()
         self.num_words_widget.setRange(4, 15)
-        self.num_words_widget.setValue(6)
+        self.num_words_widget.setValue(number_of_words)
         self.num_words_widget.valueChanged.connect(self.gen_passphrase)
         settings_line_box.addWidget(self.num_words_widget)
 

@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        phrasebook=phrasebook:main
+        phrasebook=phrasebook.cli:main
     ''',
 )
