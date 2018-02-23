@@ -17,3 +17,7 @@ source venv/bin/activate
 pip install -e .
 ```
 You can now run phrasebook with the command `phrasebook`  while in the virtual environment.
+
+
+## Wordlists
+* [en.txt](phrasebook/wordlists/en.txt) was created by [SecureDrop](https://github.com/freedomofpress/securedrop/blob/develop/securedrop/wordlists/en.txt) and is licensed AGPLv3. It's based of a CC-BY list created be the [EFF](https://eff.org/wordlist).
