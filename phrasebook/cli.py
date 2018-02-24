@@ -19,7 +19,7 @@ from phrasebook.gui import PhraseWindow, app
 def main(word_list=None, num_words=None, locale=None):
     phrase_win = PhraseWindow(
         word_list_path=word_list,
-        number_of_words=num_words,
+        num_words=num_words,
         locale=locale,
     )
     phrase_win.show()

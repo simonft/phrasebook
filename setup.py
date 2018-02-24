@@ -8,6 +8,7 @@ setup(
         'click',
         'pyqt5',
         'pycryptodome',
+        'qtawesome',
     ],
     entry_points='''
         [console_scripts]
