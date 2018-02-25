@@ -1,6 +1,8 @@
 # phrasebook
 ### This is still very much in Alpha. Please don't use it to generate important passphrases.
 
+![Screenshot](screenshot.png)
+
 Phrasebook is a program for generating secure passphrases from a word list. It's based off the idea behind the [EFF's diceware](https://www.eff.org/dice) and [XKCD #936](https://www.xkcd.com/936/). Unlike similar programs, it provides a graphical user interface (it does not need to be run from the command line) and allows for importing and using a custom wordlist of the user's choosing. 
 
 A goal of the project is being very simile and easy to use for non-technical users.
