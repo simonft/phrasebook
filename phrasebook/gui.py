@@ -62,7 +62,6 @@ class PhraseWindow(QtWidgets.QMainWindow):
         settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
 
     def update_num_words(self, num):
-        print(num)
         self.num_words = num
         self.gen_passphrase()
 
