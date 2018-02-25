@@ -73,7 +73,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
         )
 
     def open_new_file(self):
-        fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', str(Path.home()))
+        fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
 
         if fname[0]:
             self.wordlist = Wordlist(path=fname[0])
