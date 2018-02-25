@@ -84,12 +84,22 @@ class PhraseWindow(QtWidgets.QMainWindow):
             self.gen_passphrase()
 
 
-class PassphraseDisplayWidget(QtWidgets.QLabel):
+class PassphraseDisplayWidget(QtWidgets.QScrollArea):
     def __init__(self, passphrase):
-        super().__init__(passphrase)
-        self.setFont(QFont('SansSerif', 20))
-        self.setAlignment(QtCore.Qt.AlignCenter)
-        self.setWordWrap(True)
+        super().__init__()
+        self.setWidget(self.PassphraseDisplayWidgetText(passphrase))
+        self.setWidgetResizable(True)
+        self.setFrameStyle(0)
+
+    def setText(self, text):
+        self.widget().setText(text)
+
+    class PassphraseDisplayWidgetText(QtWidgets.QLabel):
+        def __init__(self, passphrase):
+            super().__init__(passphrase)
+            self.setFont(QFont('SansSerif', 20))
+            self.setAlignment(QtCore.Qt.AlignCenter)
+            self.setWordWrap(True)
 
 
 class RegenButton(QtWidgets.QLabel):
