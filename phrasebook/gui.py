@@ -55,14 +55,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
         settings_line_box.addWidget(NumberOfWordsWidget(self.num_words,
                                                         self.update_num_words))
         settings_line_box.addStretch()
-
-        # Menu bar
-        open_new_wordlist_act = QtWidgets.QAction('&Open new wordlist', self)
-        open_new_wordlist_act.triggered.connect(self.open_new_file)
-        self.statusBar()
-        menuBar = self.menuBar()
-        fileMenu = menuBar.addMenu('&File')
-        fileMenu.addAction(open_new_wordlist_act)
+        settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
 
     def update_num_words(self, num):
         print(num)
@@ -121,6 +114,12 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
         self.setRange(4, 15)
         self.setValue(num_words)
         self.valueChanged.connect(value_changed_fn)
+
+
+class OpenNewWordlistButton(QtWidgets.QPushButton):
+    def __init__(self, fn):
+        super().__init__("Open new wordlist")
+        self.clicked.connect(fn)
 
 
 app = QtWidgets.QApplication(sys.argv)
