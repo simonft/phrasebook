@@ -6,7 +6,7 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QFont
 import qtawesome as qta
 
-from phrasebook.passphrase import (Wordlist,
+from phrasebook.wordlist import (Wordlist,
                                    FileTooLargeExeception,
                                    BadWordlistException)
 
