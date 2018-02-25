@@ -1,12 +1,14 @@
 import sys
-from pathlib import Path
+
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QFont
 import qtawesome as qta
 
-from phrasebook.passphrase import Wordlist
+from phrasebook.passphrase import (Wordlist,
+                                   FileTooLargeExeception,
+                                   BadWordlistException)
 
 
 class PhraseWindow(QtWidgets.QMainWindow):
@@ -21,7 +23,22 @@ class PhraseWindow(QtWidgets.QMainWindow):
         locale -- A locale when choosing a default wordlist. Not yet implemented.
         """
         QtWidgets.QMainWindow.__init__(self)
-        self.wordlist = Wordlist(path=word_list_path)
+
+        try:
+            self.wordlist = Wordlist(path=word_list_path)
+        except FileTooLargeExeception:
+            ErrorDialog(
+                "Error: wordlist is too large to open. "
+                "Please try again with a different file."
+            ).exec_()
+            sys.exit(1)
+        except BadWordlistException:
+            ErrorDialog(
+                "Error: wordlist has weird words. "
+                "Please try again with a different file."
+            ).exec_()
+            sys.exit(1)
+
         self.num_words = num_words
 
         self.setMinimumSize(QSize(800, 220))
@@ -76,8 +93,21 @@ class PhraseWindow(QtWidgets.QMainWindow):
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
 
         if fname[0]:
-            self.wordlist = Wordlist(path=fname[0])
-            self.gen_passphrase()
+            try:
+                self.wordlist = Wordlist(path=fname[0])
+                self.gen_passphrase()
+            except FileTooLargeExeception:
+                ErrorDialog(
+                    "Error: wordlist is too large to open. "
+                    "Please contact the person or organization you recieved this file from "
+                    "and inform them of this error."
+                ).exec_()
+            except BadWordlistException:
+                ErrorDialog(
+                    "Error: wordlist has weird words. "
+                    "Please contact the person or organization you recieved this file from "
+                    "and inform them of this error."
+                ).exec_()
 
 
 class PassphraseDisplayWidget(QtWidgets.QScrollArea):
@@ -165,6 +195,17 @@ class OpenNewWordlistButton(QtWidgets.QPushButton):
         """
         super().__init__("Open new wordlist")
         self.clicked.connect(fn)
+
+
+class ErrorDialog(QtWidgets.QMessageBox):
+    """Shows an error dialog"""
+    def __init__(self, error_text):
+        """
+        Args:
+        error_text -- the text to show in the dialog box
+        """
+        super().__init__()
+        self.setText(error_text)
 
 
 app = QtWidgets.QApplication(sys.argv)
