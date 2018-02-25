@@ -17,6 +17,9 @@ from phrasebook.gui import PhraseWindow, app
 #               help="The locale to use when selecting a default wordlist",
 #               type=click.String())
 def main(word_list=None, num_words=None, locale=None):
+    """
+    Entry point for CLI.
+    """
     phrase_win = PhraseWindow(
         word_list_path=word_list,
         num_words=num_words,

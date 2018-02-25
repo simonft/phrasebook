@@ -10,16 +10,20 @@ from phrasebook.passphrase import Wordlist
 
 
 class PhraseWindow(QtWidgets.QMainWindow):
-    def __init__(self,
-                 word_list_path=None,
-                 num_words=None,
-                 locale=None):
+    """The main QT window for the program."""
+    def __init__(self, word_list_path=None, num_words=None, locale=None):
+        """
+        Sets up the main window.
+
+        Keyword arguments:
+        word_list_path -- A string containing the path to a custom wordlist
+        num_words -- The number of words to display
+        locale -- A locale when choosing a default wordlist. Not yet implemented.
+        """
         QtWidgets.QMainWindow.__init__(self)
         self.wordlist = Wordlist(path=word_list_path)
         self.num_words = num_words
-        self.initUI()
 
-    def initUI(self):
         self.setMinimumSize(QSize(800, 220))
         self.setWindowTitle("Phrasebook")
 
@@ -78,17 +82,35 @@ class PhraseWindow(QtWidgets.QMainWindow):
 
 
 class PassphraseDisplayWidget(QtWidgets.QScrollArea):
+    """Widget to display the passphrase, with a scollbar when required"""
     def __init__(self, passphrase):
+        """
+        Args:
+        passprase -- a string containing the generated passphrase to display
+        """
         super().__init__()
         self.setWidget(self.PassphraseDisplayWidgetText(passphrase))
         self.setWidgetResizable(True)
         self.setFrameStyle(0)
 
-    def setText(self, text):
-        self.widget().setText(text)
+    def setText(self, passphrase):
+        """
+        Updates the passphrase to display
+
+        Args:
+        passphrase -- a string containing the passphrase to display
+        """
+        self.widget().setText(passphrase)
 
     class PassphraseDisplayWidgetText(QtWidgets.QLabel):
+        """
+        Actual class that display the passphrase.
+        """
         def __init__(self, passphrase):
+            """
+            Args:
+            passprase -- a string containing the generated passphrase to display
+            """
             super().__init__(passphrase)
             self.setFont(QFont('SansSerif', 20))
             self.setAlignment(QtCore.Qt.AlignCenter)
@@ -96,7 +118,13 @@ class PassphraseDisplayWidget(QtWidgets.QScrollArea):
 
 
 class RegenButton(QtWidgets.QLabel):
+    """A button to regenerate the passphrase"""
     def __init__(self, clicked_fn):
+        """
+        Args:
+        clicked_fn -- A function that will regenerate and reset the passphrase.
+                      This will be called when the button is clicked.
+        """
         super().__init__("")
         self.clicked.connect(clicked_fn)
         self.setPixmap(qta.icon('fa.refresh').pixmap(30, 30))
@@ -105,11 +133,21 @@ class RegenButton(QtWidgets.QLabel):
     clicked = pyqtSignal()
 
     def mousePressEvent(self, event):
+        """Runs when button is clicked."""
         self.clicked.emit()
 
 
 class NumberOfWordsWidget(QtWidgets.QSpinBox):
+    """
+    A widget that allows the user to update the number of words to use in
+    the passphrase.
+    """
     def __init__(self, num_words, value_changed_fn):
+        """
+        Args:
+        num_words -- number of words to start with.
+        value_changed_fn -- function to call when the user changes the number
+        """
         super().__init__()
         self.setRange(4, 15)
         self.setValue(num_words)
@@ -117,7 +155,15 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
 
 
 class OpenNewWordlistButton(QtWidgets.QPushButton):
+    """
+    A button allowing the user to select a custom wordlist. Opens a file
+    selection dialog.
+    """
     def __init__(self, fn):
+        """
+        Args:
+        fn -- function to call with the updated path.
+        """
         super().__init__("Open new wordlist")
         self.clicked.connect(fn)
 
