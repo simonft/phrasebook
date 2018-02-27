@@ -212,8 +212,28 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
         super().__init__()
         self.setRange(4, 15)
         self.setValue(num_words)
+
         for fn in value_changed_fns:
             self.valueChanged.connect(fn)
+
+        # Don't allow focus or selection of the value.
+        self.setFocusPolicy(0)
+        # Style the widget
+        self.setFrame(False)
+        self.setStyleSheet(
+            """
+            QSpinBox {
+              background-color : #efefef;
+              selection-background-color : #efefef;
+              selection-color: black;
+              font-weight: bold;
+              color: black;
+            }
+            QLineEdit {
+              border: 0px solid black;
+            }
+            """
+        )
 
 
 class OpenNewWordlistButton(QtWidgets.QPushButton):
