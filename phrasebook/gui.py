@@ -1,4 +1,5 @@
 import sys
+import math
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal
@@ -39,8 +40,6 @@ class PhraseWindow(QtWidgets.QMainWindow):
             ).exec_()
             sys.exit(1)
 
-        self.num_words = num_words
-
         self.setMinimumSize(QSize(800, 220))
         self.setWindowTitle("Phrasebook")
 
@@ -50,18 +49,21 @@ class PhraseWindow(QtWidgets.QMainWindow):
         main_layout = QtWidgets.QVBoxLayout()
         central_widget.setLayout(main_layout)
 
-        main_layout.addSpacing(15)
+        self.warning_line_widget = WarningLineWidget("")
+
+        main_layout.addWidget(self.warning_line_widget)
 
         # Main passphrase display
         passphrase_line = QtWidgets.QHBoxLayout()
-        self.passphrase_widget = PassphraseDisplayWidget(
-            self.wordlist.gen_passphrase(self.num_words)
-        )
+        self.passphrase_widget = PassphraseDisplayWidget("")
+        self.update_num_words(num_words)
         passphrase_line.addWidget(self.passphrase_widget, 1)
 
         # Passphrase regeneration button
         passphrase_line.addSpacing(10)
-        passphrase_line.addWidget(RegenButton(self.gen_passphrase))
+        passphrase_line.addWidget(
+            RegenButton([self.gen_passphrase, self.check_entropy])
+        )
         passphrase_line.addSpacing(10)
         main_layout.addLayout(passphrase_line)
 
@@ -73,8 +75,11 @@ class PhraseWindow(QtWidgets.QMainWindow):
 
         # Selection box for number of words
         settings_line_box.addWidget(QtWidgets.QLabel("Number of words", self))
-        settings_line_box.addWidget(NumberOfWordsWidget(self.num_words,
-                                                        self.update_num_words))
+        settings_line_box.addWidget(
+            NumberOfWordsWidget(
+                self.num_words, [self.update_num_words, self.check_entropy]
+            )
+        )
         settings_line_box.addStretch()
         settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
 
@@ -88,6 +93,20 @@ class PhraseWindow(QtWidgets.QMainWindow):
                 self.num_words
             )
         )
+
+    def check_entropy(self):
+        """
+        Ensure the entropy from the number of words in the wordlist and in
+        the passphrase is high enough.
+        """
+        if math.log2(len(self.wordlist.words) ** self.num_words) < 50:
+            self.warning_line_widget.setText(
+                "Warning: " + str(self.num_words) + " words is too few for the "
+                "passphrase to be secure with the wordlist you're using."
+                "Try increasing the number of words."
+            )
+        else:
+            self.warning_line_widget.setText("")
 
     def open_new_file(self):
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
@@ -108,6 +127,17 @@ class PhraseWindow(QtWidgets.QMainWindow):
                     "Please contact the person or organization you recieved this file from "
                     "and inform them of this error."
                 ).exec_()
+
+
+class WarningLineWidget(QtWidgets.QLabel):
+    """Widget to display warning text"""
+    def __init__(self, warning_text):
+        super().__init__()
+        self.setText(warning_text)
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setFont(QFont('SansSerif', 14))
+        self.setStyleSheet("QLabel { color : red; }")
+        self.setWordWrap(True)
 
 
 class PassphraseDisplayWidget(QtWidgets.QScrollArea):
@@ -148,14 +178,15 @@ class PassphraseDisplayWidget(QtWidgets.QScrollArea):
 
 class RegenButton(QtWidgets.QLabel):
     """A button to regenerate the passphrase"""
-    def __init__(self, clicked_fn):
+    def __init__(self, clicked_fns):
         """
         Args:
-        clicked_fn -- A function that will regenerate and reset the passphrase.
-                      This will be called when the button is clicked.
+        clicked_fn -- An array of functions to be called when the button
+                      is clicked.
         """
         super().__init__("")
-        self.clicked.connect(clicked_fn)
+        for fn in clicked_fns:
+            self.clicked.connect(fn)
         self.setPixmap(qta.icon('fa.refresh').pixmap(30, 30))
         self.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -171,16 +202,18 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
     A widget that allows the user to update the number of words to use in
     the passphrase.
     """
-    def __init__(self, num_words, value_changed_fn):
+    def __init__(self, num_words, value_changed_fns):
         """
         Args:
         num_words -- number of words to start with.
-        value_changed_fn -- function to call when the user changes the number
+        value_changed_fn -- arrry of functions to call when the user
+                            changes the number
         """
         super().__init__()
         self.setRange(4, 15)
         self.setValue(num_words)
-        self.valueChanged.connect(value_changed_fn)
+        for fn in value_changed_fns:
+            self.valueChanged.connect(fn)
 
 
 class OpenNewWordlistButton(QtWidgets.QPushButton):
