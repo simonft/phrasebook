@@ -9,6 +9,7 @@ setup(
         'pyqt5',
         'pycryptodome',
         'qtawesome',
+        'babel',
     ],
     entry_points='''
         [console_scripts]
