@@ -3,11 +3,17 @@
 
 ![Screenshot](screenshot.png)
 
-Phrasebook is a program for generating secure passphrases from a word list. It's based off the idea behind the [EFF's diceware](https://www.eff.org/dice) and [XKCD #936](https://www.xkcd.com/936/). Unlike similar programs, it provides a graphical user interface (it does not need to be run from the command line) and allows for importing and using a custom wordlist of the user's choosing. 
+Phrasebook is a program for generating secure passphrases from a word list. It's based off the idea behind the [EFF's diceware](https://www.eff.org/dice) and [XKCD #936](https://www.xkcd.com/936/).
 
-A goal of the project is being very simile and easy to use for non-technical users.
+It aims to support a few features often not present in similar programs:
+- It provides a very simple graphical user interface instead of a
+  command line interface.
+- It allows for importing and using a custom wordlist of the user's choosing.
+- It aims to provide default wordlists in languages other than just English.
+- It allows for translations of the interface to make it accessible to
+  non-English speakers.
 
-In the future it will also have the ability to auto select a reasonable word list based on the user's system locale. 
+Ease of uses and simplicity are strong design goals of the project.
 
 ## Developing on OSX/Linux
 Install using the following commands. You must already have python, pip, and virtualenv installed and available on your path.
@@ -19,6 +25,10 @@ source venv/bin/activate
 pip install -e .
 ```
 You can now run phrasebook with the command `phrasebook`  while in the virtual environment.
+
+## Helping with translations
+phrasebook is currently only available in English. If you're
+interested in helping translate please reach out.
 
 
 ## Wordlists
