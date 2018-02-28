@@ -22,7 +22,7 @@ git clone https://github.com/simonft/phrasebook.git
 cd phrasebook
 virtualenv venv/
 source venv/bin/activate
-pip install -e .
+pip install -e .[dev]
 ```
 You can now run phrasebook with the command `phrasebook`  while in the virtual environment.
 

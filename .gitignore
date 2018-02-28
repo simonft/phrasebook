@@ -1,3 +1,4 @@
 phrasebook.egg-info/
 __pycache__/
 phrasebook/locale/**/*.mo
+dist/

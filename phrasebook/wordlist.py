@@ -19,9 +19,7 @@ class Wordlist:
         path -- if provided, uses the custom wordlist at path
         """
         if not path:
-            path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                'wordlists',
-                                'en.txt')
+            path = os.path.join(os.path.dirname(__file__), 'wordlists', 'en.txt')
 
         # Make sure the file isn't over 5 megabytes in size. This is
         # an arbitrarily chosen "too large to be reasonable".
