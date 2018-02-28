@@ -1,6 +1,6 @@
 import os
 
-from Crypto.Random import random
+from random import SystemRandom
 
 
 class Wordlist:
@@ -55,6 +55,7 @@ class Wordlist:
         Args:
         num -- number of words to use in the wordlist.
         """
+        random = SystemRandom()
         return ' '.join(random.choice(self.words)
                         for x in range(num))
 
