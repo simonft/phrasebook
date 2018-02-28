@@ -1,11 +1,11 @@
-import sys
 import math
+import os
+import sys
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QSize
-from PyQt5.QtGui import QFont
-import qtawesome as qta
+from PyQt5.QtGui import QFont, QIcon
 
 from phrasebook import _
 from phrasebook.wordlist import (Wordlist,
@@ -190,7 +190,10 @@ class RegenButton(QtWidgets.QLabel):
         super().__init__("")
         for fn in clicked_fns:
             self.clicked.connect(fn)
-        self.setPixmap(qta.icon('fa.refresh').pixmap(30, 30))
+        self.setPixmap(
+            QIcon(os.path.join(os.path.dirname(__file__),
+                               "images/sync-alt.svg")).pixmap(25, 25)
+        )
         self.setAlignment(QtCore.Qt.AlignCenter)
 
     clicked = pyqtSignal()

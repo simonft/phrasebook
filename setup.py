@@ -7,7 +7,6 @@ setup(
     install_requires=[
         'click',
         'pyqt5',
-        'qtawesome',
         'babel',
     ],
     entry_points='''
