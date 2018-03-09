@@ -26,20 +26,23 @@ class PhraseWindow(QtWidgets.QMainWindow):
         """
         QtWidgets.QMainWindow.__init__(self)
 
-        try:
-            self.wordlist = Wordlist(path=word_list_path)
-        except FileTooLargeExeception:
-            ErrorDialog(
-                "Error: wordlist is too large to open. "
-                "Please try again with a different file."
-            ).exec_()
-            sys.exit(1)
-        except BadWordlistException:
-            ErrorDialog(
-                "Error: wordlist has weird words. "
-                "Please try again with a different file."
-            ).exec_()
-            sys.exit(1)
+        if word_list_path:
+            try:
+                self.wordlist = Wordlist.open_path(word_list_path)
+            except FileTooLargeExeception:
+                ErrorDialog(
+                    "Error: wordlist is too large to open. "
+                    "Please try again with a different file."
+                ).exec_()
+                sys.exit(1)
+            except BadWordlistException:
+                ErrorDialog(
+                    "Error: wordlist has weird words. "
+                    "Please try again with a different file."
+                ).exec_()
+                sys.exit(1)
+        else:
+            self.wordlist = Wordlist.for_locale('en')
 
         self.setMinimumSize(QSize(800, 220))
         self.setWindowTitle("Phrasebook")
@@ -116,7 +119,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
 
         if fname[0]:
             try:
-                self.wordlist = Wordlist(path=fname[0])
+                self.wordlist = Wordlist.open_path(fname[0])
                 self.gen_passphrase()
             except FileTooLargeExeception:
                 ErrorDialog(_(

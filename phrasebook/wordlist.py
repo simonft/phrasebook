@@ -1,4 +1,5 @@
 import os
+from pkg_resources import resource_exists, resource_string
 
 from random import SystemRandom
 
@@ -9,42 +10,51 @@ class Wordlist:
     """
     words = None
 
-    def __init__(self, path=None):
+    def __init__(self, words):
         """
-        Parse either a provided file or a default. Throws FileTooLargeExeception
+        Args:
+        word -- an array of words
+        """
+        self.words = words
+
+    @classmethod
+    def for_locale(cls, locale=None):
+        """
+        Returns a new Wordlist object using the default wordlist for that
+        locale, or the en wordlist as a default.
+        """
+        resource = None
+        if locale:
+            resource_path = 'wordlists/' + locale + '.txt'
+            if resource_exists('phrasebook', resource_path):
+                resource = 'wordlists/' + locale + '.txt'
+        if not resource:
+            resource = 'wordlists/en.txt'
+
+        wordlist = resource_string('phrasebook', resource).decode('utf-8')
+
+        return cls(wordlist.splitlines())
+
+    @classmethod
+    def open_path(cls, path):
+        """
+        Parse either a provided file. Throws FileTooLargeExeception
         if the file is over 5mb, or BadWordlistException if there's something wrong
         with the contents of the wordlist.
 
         Args:
-        path -- if provided, uses the custom wordlist at path
+        path -- a string the path to the wordlist to open
         """
-        if not path:
-            path = os.path.join(os.path.dirname(__file__), 'wordlists', 'en.txt')
-
         # Make sure the file isn't over 5 megabytes in size. This is
         # an arbitrarily chosen "too large to be reasonable".
         if os.stat(path).st_size > 1024 * 1024 * 5:
             raise FileTooLargeExeception()
 
         with open(path) as f:
-            self.words = f.read().splitlines()
+            words = f.read().splitlines()
 
-        self.sanity_check_wordlist(self.words)
-
-    @classmethod
-    def for_locale(cls, locale):
-        """
-        Returns a new Wordlist object using the default wordlist for that
-        locale, or the en wordlist as a default.
-        """
-        if locale != 'en':
-            path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                'wordlists',
-                                locale + '.txt')
-            if os.path.exists(path):
-                return cls(path)
-            else:
-                return cls()
+        Wordlist.sanity_check_wordlist(words)
+        return cls(words)
 
     def gen_passphrase(self, num):
         """
