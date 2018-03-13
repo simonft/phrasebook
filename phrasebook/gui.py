@@ -26,13 +26,23 @@ class PhraseWindow(QtWidgets.QMainWindow):
         """
         QtWidgets.QMainWindow.__init__(self)
 
+        self.setStyleSheet(
+            """
+            QMainWindow {
+              background-color: #ededed;
+            }
+            """
+        )
+
         if word_list_path:
             if not self.open_file(word_list_path):
                 sys.exit(1)
         else:
             self.wordlist = Wordlist.for_locale(locale)
 
-        self.setMinimumSize(QSize(800, 220))
+        # Fits reasonably well on a 1024x768 srceen.
+        self.setMinimumSize(QSize(400, 220))
+        self.resize(940, 220)
         self.setWindowTitle("Phrasebook")
 
         central_widget = QtWidgets.QWidget(self)
@@ -48,24 +58,27 @@ class PhraseWindow(QtWidgets.QMainWindow):
         # Main passphrase display
         passphrase_line = QtWidgets.QHBoxLayout()
         self.passphrase_widget = PassphraseDisplayWidget("")
+        passphrase_line.addSpacing(20)
         passphrase_line.addWidget(self.passphrase_widget, 1)
 
         # Passphrase regeneration button
-        passphrase_line.addSpacing(10)
+        passphrase_line.addSpacing(15)
         passphrase_line.addWidget(
             RegenButton([self.gen_passphrase])
         )
         passphrase_line.addSpacing(10)
+        main_layout.addStretch()
         main_layout.addLayout(passphrase_line)
+        main_layout.addStretch()
 
         main_layout.addSpacing(15)
 
         settings_line_box = QtWidgets.QHBoxLayout()
         main_layout.addLayout(settings_line_box)
-        settings_line_box.addSpacing(15)
+        settings_line_box.addSpacing(20)
 
         # Selection box for number of words
-        settings_line_box.addWidget(QtWidgets.QLabel(_("Number of words"), self))
+        settings_line_box.addWidget(QtWidgets.QLabel(_("Number of words:"), self))
         self.num_words_widget = NumberOfWordsWidget(
                 num_words, len(self.wordlist.words), [self.gen_passphrase]
         )
@@ -73,6 +86,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
 
         settings_line_box.addStretch()
         settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
+        settings_line_box.addSpacing(5)
 
         # Generate the initial passphrase
         self.gen_passphrase()
@@ -149,7 +163,14 @@ class PassphraseDisplayWidget(QtWidgets.QScrollArea):
         super().__init__()
         self.setWidget(self.PassphraseDisplayWidgetText(passphrase))
         self.setWidgetResizable(True)
-        self.setFrameStyle(0)
+        self.setStyleSheet(
+            """
+            QScrollArea {
+              border: 1px solid gray;
+              border-radius: 2px;
+            }
+            """
+        )
 
     def setText(self, passphrase):
         """
@@ -173,6 +194,15 @@ class PassphraseDisplayWidget(QtWidgets.QScrollArea):
             self.setFont(QFont('SansSerif', 20))
             self.setAlignment(QtCore.Qt.AlignCenter)
             self.setWordWrap(True)
+            self.setStyleSheet(
+                """
+                QLabel {
+                  background-color: #ededed;
+                  margin-left: 10px;
+                  margin-right: 10px;
+                }
+                """
+            )
 
 
 class RegenButton(QtWidgets.QLabel):
@@ -227,14 +257,11 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
         self.setStyleSheet(
             """
             QSpinBox {
-              background-color : #efefef;
-              selection-background-color : #efefef;
+              background-color: #ededed;
+              selection-background-color: #ededed;
               selection-color: black;
               font-weight: bold;
               color: black;
-            }
-            QLineEdit {
-              border: 0px solid black;
             }
             """
         )
