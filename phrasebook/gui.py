@@ -60,13 +60,12 @@ class PhraseWindow(QtWidgets.QMainWindow):
         # Main passphrase display
         passphrase_line = QtWidgets.QHBoxLayout()
         self.passphrase_widget = PassphraseDisplayWidget("")
-        self.update_num_words(num_words)
         passphrase_line.addWidget(self.passphrase_widget, 1)
 
         # Passphrase regeneration button
         passphrase_line.addSpacing(10)
         passphrase_line.addWidget(
-            RegenButton([self.gen_passphrase, self.check_entropy])
+            RegenButton([self.gen_passphrase])
         )
         passphrase_line.addSpacing(10)
         main_layout.addLayout(passphrase_line)
@@ -79,40 +78,26 @@ class PhraseWindow(QtWidgets.QMainWindow):
 
         # Selection box for number of words
         settings_line_box.addWidget(QtWidgets.QLabel(_("Number of words"), self))
-        settings_line_box.addWidget(
-            NumberOfWordsWidget(
-                self.num_words, [self.update_num_words, self.check_entropy]
-            )
+        self.num_words_widget = NumberOfWordsWidget(
+                num_words, len(self.wordlist.words), [self.gen_passphrase]
         )
+        settings_line_box.addWidget(self.num_words_widget)
+
         settings_line_box.addStretch()
         settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
 
-    def update_num_words(self, num):
-        self.num_words = num
+        # Generate the initial passphrase
         self.gen_passphrase()
 
     def gen_passphrase(self):
+        """
+        Generates a passphrase and sets the display widget to show it.
+        """
         self.passphrase_widget.setText(
             self.wordlist.gen_passphrase(
-                self.num_words
+                self.num_words_widget.value()
             )
         )
-
-    def check_entropy(self):
-        """
-        Ensure the entropy from the number of words in the wordlist and in
-        the passphrase is high enough.
-        """
-        if math.log2(len(self.wordlist.words) ** self.num_words) < 50:
-            self.warning_line_widget.setText(
-                _("Warning") + ": " +
-                str(self.num_words) +
-                _(" words is too few for the passphrase to be secure with "
-                  "the wordlist you're using."
-                  "Try increasing the number of words.")
-                )
-        else:
-            self.warning_line_widget.setText("")
 
     def open_new_file(self):
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
@@ -120,6 +105,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
         if fname[0]:
             try:
                 self.wordlist = Wordlist.open_path(fname[0])
+                self.num_words_widget.set_safe_minimum(len(self.wordlist.words))
                 self.gen_passphrase()
             except FileTooLargeExeception:
                 ErrorDialog(_(
@@ -211,16 +197,18 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
     A widget that allows the user to update the number of words to use in
     the passphrase.
     """
-    def __init__(self, num_words, value_changed_fns):
+    def __init__(self, num_words, wordlist_length, value_changed_fns):
         """
         Args:
-        num_words -- number of words to start with.
+        num_words -- number of words to start with. If this is below a safe
+                     value it will be raised
+        wordlist_length -- number of words in the wordlist
         value_changed_fn -- arrry of functions to call when the user
                             changes the number
         """
         super().__init__()
-        self.setRange(4, 15)
         self.setValue(num_words)
+        self.set_safe_minimum(wordlist_length)
 
         for fn in value_changed_fns:
             self.valueChanged.connect(fn)
@@ -243,6 +231,17 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
             }
             """
         )
+
+    def set_safe_minimum(self, wordlist_length, min_entropy=50):
+        """
+        Sets a safe minimum number of words based on the length of the wordlist.
+
+        Args:
+        wordlist_length -- integer representing the number of words in the wordlist
+        min_entropy -- integer representing the minimum acceptable amount of
+                       entropy in the passphrase
+        """
+        self.setRange(math.ceil(min_entropy / math.log2(wordlist_length)), 15)
 
 
 class OpenNewWordlistButton(QtWidgets.QPushButton):
