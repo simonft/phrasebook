@@ -6,12 +6,13 @@ DESCRIPTION = 'Multilingual desktop application for generating secure passphrase
 URL = 'https://github.com/simonft/phrasebook'
 EMAIL = 'simonft@riseup.net'
 AUTHOR = 'Simon Fondrie-Teitler'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3.5.0'
 VERSION = '0.1-dev'
 
 REQUIRED = [
     'click',
     'pyqt5',
+    'babel',
 ]
 
 
@@ -53,7 +54,6 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
