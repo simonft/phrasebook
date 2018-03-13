@@ -42,7 +42,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
                 ).exec_()
                 sys.exit(1)
         else:
-            self.wordlist = Wordlist.for_locale('en')
+            self.wordlist = Wordlist.for_locale(locale)
 
         self.setMinimumSize(QSize(800, 220))
         self.setWindowTitle("Phrasebook")

@@ -1,7 +1,8 @@
 import os
-from pkg_resources import resource_exists, resource_string
-
+from pkg_resources import resource_string
 from random import SystemRandom
+
+from babel import parse_locale, get_locale_identifier
 
 
 class Wordlist:
@@ -18,22 +19,32 @@ class Wordlist:
         self.words = words
 
     @classmethod
-    def for_locale(cls, locale=None):
+    def for_locale(cls, locale="en"):
         """
-        Returns a new Wordlist object using the default wordlist for that
-        locale, or the en wordlist as a default.
+        Returns a new Wordlist object using an included wordlist most
+        appropriate to the provided locale, or the en wordlist as a default.
+
+        This parses the locale string and first tries to find a file matching
+        both the language and territory. Failing that, it tries to find one
+        matching the language. Failing that, it falls back to `en`.
+
+        Args:
+        locale -- An RFC 4646 locale string (optional)
         """
-        resource = None
+        wordlist_path_string = "wordlists/{}.txt".format
         if locale:
-            resource_path = 'wordlists/' + locale + '.txt'
-            if resource_exists('phrasebook', resource_path):
-                resource = 'wordlists/' + locale + '.txt'
-        if not resource:
-            resource = 'wordlists/en.txt'
+            locale_tuple = parse_locale(locale)
+            for test_wordlist_locale in [locale_tuple[:2], locale_tuple[:1], "en"]:
+                path = wordlist_path_string(get_locale_identifier(test_wordlist_locale))
+                try:
+                    return cls(resource_string('phrasebook', path).decode('utf-8').splitlines())
+                except FileNotFoundError:
+                    continue
 
-        wordlist = resource_string('phrasebook', resource).decode('utf-8')
-
-        return cls(wordlist.splitlines())
+        # This should never happen, since the "en" file should always be there
+        # as a fallback. If for some reason it's not, exit with a helpful
+        # exception message.
+        raise Exception("No suitable wordlist file found")
 
     @classmethod
     def open_path(cls, path):

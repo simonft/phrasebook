@@ -1,6 +1,7 @@
 import sys
 
 import click
+from locale import getlocale
 
 from phrasebook.gui import PhraseWindow, app
 
@@ -20,6 +21,9 @@ def main(word_list=None, num_words=None, locale=None):
     """
     Entry point for CLI.
     """
+    if not locale:
+        locale = getlocale()[0]
+
     phrase_win = PhraseWindow(
         word_list_path=word_list,
         num_words=num_words,
