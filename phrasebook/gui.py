@@ -27,19 +27,7 @@ class PhraseWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
 
         if word_list_path:
-            try:
-                self.wordlist = Wordlist.open_path(word_list_path)
-            except FileTooLargeExeception:
-                ErrorDialog(
-                    "Error: wordlist is too large to open. "
-                    "Please try again with a different file."
-                ).exec_()
-                sys.exit(1)
-            except BadWordlistException:
-                ErrorDialog(
-                    "Error: wordlist has weird words. "
-                    "Please try again with a different file."
-                ).exec_()
+            if not self.open_file(word_list_path):
                 sys.exit(1)
         else:
             self.wordlist = Wordlist.for_locale(locale)
@@ -100,25 +88,44 @@ class PhraseWindow(QtWidgets.QMainWindow):
         )
 
     def open_new_file(self):
+        """
+        Uses the QT file dialog to allow the user to select a the path to a
+        new wordlist. It then tries to open the wordlist. If successful,
+        sets a new safe minimum number of characters in the passphrase and
+        generates a passphrase with the new wordlist.
+        """
         fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
 
         if fname[0]:
-            try:
-                self.wordlist = Wordlist.open_path(fname[0])
+            if self.open_file(fname[0]):
                 self.num_words_widget.set_safe_minimum(len(self.wordlist.words))
                 self.gen_passphrase()
-            except FileTooLargeExeception:
-                ErrorDialog(_(
-                    "Error: wordlist is too large to open. "
-                    "Please contact the person or organization you recieved this file from "
-                    "and inform them of this error."
-                )).exec_()
-            except BadWordlistException:
-                ErrorDialog(_(
-                    "Error: wordlist has weird words. "
-                    "Please contact the person or organization you recieved this file from "
-                    "and inform them of this error."
-                )).exec_()
+
+    def open_file(self, path):
+        """
+        Open a file and use it as the wordlist. Returns True if
+        successful, False otherwise.
+
+        Args:
+        path -- A string containing path to wordlist.
+        """
+        try:
+            self.wordlist = Wordlist.open_path(path)
+        except FileTooLargeExeception:
+            ErrorDialog(_(
+                "Error: wordlist is too large to open. "
+                "Please contact the person or organization you recieved this file from "
+                "and inform them of this error."
+            )).exec_()
+            return False
+        except BadWordlistException:
+            ErrorDialog(_(
+                "Error: wordlist has weird words. "
+                "Please contact the person or organization you recieved this file from "
+                "and inform them of this error."
+            )).exec_()
+            return False
+        return True
 
 
 class WarningLineWidget(QtWidgets.QLabel):
