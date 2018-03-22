@@ -1,8 +1,9 @@
 import os
-from pkg_resources import resource_string
+from pkg_resources import resource_string, resource_listdir
 from random import SystemRandom
+import re
 
-from babel import parse_locale, get_locale_identifier
+from babel import parse_locale
 
 
 class Wordlist:
@@ -10,13 +11,15 @@ class Wordlist:
     Holds details about the current wordlist.
     """
     words = None
+    locale = None
 
-    def __init__(self, words):
+    def __init__(self, words, locale=None):
         """
         Args:
         word -- an array of words
         """
         self.words = words
+        self.locale = locale
 
     @classmethod
     def for_locale(cls, locale="en"):
@@ -29,16 +32,23 @@ class Wordlist:
         matching the language. Failing that, it falls back to `en`.
 
         Args:
-        locale -- An RFC 4646 locale string (optional)
+        locale -- An RFC 4646 locale string, or a tuple in the form
+                  (language, territory) (optional)
         """
-        wordlist_path_string = "wordlists/{}.txt".format
+        wordlists = get_wordlists_by_locale()
         if locale:
-            locale_tuple = parse_locale(locale)
-            for test_wordlist_locale in [locale_tuple[:2], locale_tuple[:1], "en"]:
-                path = wordlist_path_string(get_locale_identifier(test_wordlist_locale))
+            if isinstance(locale, str):
+                locale = parse_locale(locale)
+            for locale_tuple in [locale[:2], (locale[0], None), ("en", "US")]:
                 try:
-                    return cls(resource_string('phrasebook', path).decode('utf-8').splitlines())
-                except FileNotFoundError:
+                    return cls(
+                        resource_string(
+                            'phrasebook',
+                            wordlists[locale_tuple]
+                        ).decode('utf-8').splitlines(),
+                        locale=locale_tuple
+                    )
+                except KeyError:
                     continue
 
         # This should never happen, since the "en" file should always be there
@@ -127,3 +137,31 @@ class WordIsBlankException(BadWordlistException):
     """Thrown when a word is unreasonably long"""
     pass
 
+
+def get_wordlists_by_locale():
+    """
+    Returns a mapping of locales to wordlist paths
+    """
+    locale_mapping = {}
+    for file_path in resource_listdir('phrasebook', 'wordlists'):
+        m = re.search('^(.*).txt$', file_path)
+        if not m:
+            continue
+
+        # Ignore files that don't fit the format
+        try:
+            locale_mapping[parse_locale(m[1])[:2]] = 'wordlists/' + file_path
+        except ValueError:
+            continue
+
+    return locale_mapping
+
+
+def get_supported_locales():
+    """
+    Returns a sorted list of supported locale strings.
+    """
+    return sorted([
+        "_".join(x) if x[1] else x[0]
+        for x in get_wordlists_by_locale().keys()
+    ])

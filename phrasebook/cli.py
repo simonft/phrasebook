@@ -4,6 +4,7 @@ import click
 from locale import getlocale
 
 from phrasebook.gui import PhraseWindow, app
+from phrasebook.wordlist import get_supported_locales
 
 
 @click.command()
@@ -14,9 +15,9 @@ from phrasebook.gui import PhraseWindow, app
               help="Number of words to include in the passphrase (must be between 4 and 15)",
               type=click.IntRange(4, 15),
               default=6)
-# @click.option("-l", "--locale",
-#               help="The locale to use when selecting a default wordlist",
-#               type=click.String())
+@click.option("-l", "--locale",
+              help="The locale to use when selecting a wordlist.",
+              type=click.Choice(get_supported_locales()))
 def main(word_list=None, num_words=None, locale=None):
     """
     Entry point for CLI.

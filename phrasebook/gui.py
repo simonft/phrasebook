@@ -1,3 +1,4 @@
+import functools
 import math
 import os
 import sys
@@ -6,11 +7,13 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QFont, QIcon
+from babel import Locale
 
 from phrasebook import _
 from phrasebook.wordlist import (Wordlist,
                                  FileTooLargeExeception,
-                                 BadWordlistException)
+                                 BadWordlistException,
+                                 get_wordlists_by_locale)
 
 
 class PhraseWindow(QtWidgets.QMainWindow):
@@ -88,6 +91,15 @@ class PhraseWindow(QtWidgets.QMainWindow):
         settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
         settings_line_box.addSpacing(5)
 
+        menuBar = self.menuBar()
+        fileMenu = menuBar.addMenu(_("File"))
+        self.language_selection_widget = LanguageSelection(
+            fileMenu,
+            self.wordlist.locale,
+            self.new_wordlist_locale
+        )
+        fileMenu.addMenu(self.language_selection_widget)
+
         # Generate the initial passphrase
         self.gen_passphrase()
 
@@ -100,6 +112,17 @@ class PhraseWindow(QtWidgets.QMainWindow):
                 self.num_words_widget.value()
             )
         )
+
+    def new_wordlist_locale(self, locale):
+        """
+        Opens a new wordlist given a locale.
+
+        Args:
+        locale -- New locale to use
+        """
+        self.wordlist = Wordlist.for_locale(locale)
+        self.num_words_widget.set_safe_minimum(len(self.wordlist.words))
+        self.gen_passphrase()
 
     def open_new_file(self):
         """
@@ -114,6 +137,9 @@ class PhraseWindow(QtWidgets.QMainWindow):
             if self.open_file(fname[0]):
                 self.num_words_widget.set_safe_minimum(len(self.wordlist.words))
                 self.gen_passphrase()
+                # Clear the checkbox on the language list since we're no longer
+                # using that language for the word list.
+                self.language_selection_widget.clear_checkmark()
 
     def open_file(self, path):
         """
@@ -140,6 +166,43 @@ class PhraseWindow(QtWidgets.QMainWindow):
             )).exec_()
             return False
         return True
+
+
+class LanguageSelection(QtWidgets.QMenu):
+    """
+    Menu item allowing for selection of the language of the wordlist.
+    """
+    def __init__(self, parent, current_locale, locale_open_func):
+        super().__init__(_("Languages"), parent)
+        self.setTitle(_("Wordlist language"))
+
+        self.language_group = QtWidgets.QActionGroup(self)
+
+        # map the locale strings to their language (in that language)
+        name_locale_mapping = []
+        for locale in get_wordlists_by_locale():
+            # Ignore locales that aren't territory specific, since these are duplicates
+            if locale[1]:
+                name_locale_mapping.append((Locale(*locale).display_name, locale))
+
+        # Add the languages to the menu
+        for display_name, locale in sorted(name_locale_mapping):
+            action = QtWidgets.QAction(display_name, self.language_group)
+            action.setCheckable(True)
+
+            # Mark the current selected locale.
+            if locale == current_locale:
+                action.setChecked(True)
+
+            self.addAction(action)
+            action.triggered.connect(functools.partial(locale_open_func, locale))
+
+    def clear_checkmark(self):
+        """
+        Remove the checkmark next to the currently selected language, if there is one.
+        """
+        if self.language_group.checkedAction():
+            self.language_group.checkedAction().setChecked(False)
 
 
 class WarningLineWidget(QtWidgets.QLabel):
