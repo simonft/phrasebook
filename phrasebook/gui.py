@@ -88,17 +88,15 @@ class PhraseWindow(QtWidgets.QMainWindow):
         settings_line_box.addWidget(self.num_words_widget)
 
         settings_line_box.addStretch()
-        settings_line_box.addWidget(OpenNewWordlistButton(self.open_new_file))
-        settings_line_box.addSpacing(5)
 
-        menuBar = self.menuBar()
-        fileMenu = menuBar.addMenu(_("File"))
+        file_menu = self.menuBar().addMenu(_("File"))
         self.language_selection_widget = LanguageSelection(
-            fileMenu,
+            file_menu,
             self.wordlist.locale,
             self.new_wordlist_locale
         )
-        fileMenu.addMenu(self.language_selection_widget)
+        file_menu.addMenu(self.language_selection_widget)
+        file_menu.addAction("Open new wordlist").triggered.connect(self.open_new_file)
 
         # Generate the initial passphrase
         self.gen_passphrase()
@@ -339,20 +337,6 @@ class NumberOfWordsWidget(QtWidgets.QSpinBox):
                        entropy in the passphrase
         """
         self.setRange(math.ceil(min_entropy / math.log2(wordlist_length)), 15)
-
-
-class OpenNewWordlistButton(QtWidgets.QPushButton):
-    """
-    A button allowing the user to select a custom wordlist. Opens a file
-    selection dialog.
-    """
-    def __init__(self, fn):
-        """
-        Args:
-        fn -- function to call with the updated path.
-        """
-        super().__init__(_("Open new wordlist"))
-        self.clicked.connect(fn)
 
 
 class ErrorDialog(QtWidgets.QMessageBox):
