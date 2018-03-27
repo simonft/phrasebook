@@ -16,11 +16,11 @@ It aims to support a few features often not present in similar programs:
 Ease of uses and simplicity are strong design goals of the project.
 
 ## Developing on OSX/Linux
-Install using the following commands. You must already have python, pip, and virtualenv installed and available on your path.
+Install using the following commands. You must already have python3, pip, and virtualenv installed and available on your path.
 ```
 git clone https://github.com/simonft/phrasebook.git
 cd phrasebook
-virtualenv venv/
+virtualenv -p `which python3` venv/
 source venv/bin/activate
 pip install -e .[dev]
 ```
